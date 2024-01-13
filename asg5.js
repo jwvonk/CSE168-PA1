@@ -6,6 +6,7 @@ import { VRButton } from 'three/addons/webxr/VRButton.js';
 function main() {
     const canvas = document.querySelector('#c');
     const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
+    renderer.setSize( window.innerWidth, window.innerHeight );
     renderer.shadowMap.enabled = true;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.xr.enabled = true;
@@ -212,18 +213,6 @@ function main() {
 
 
 
-
-    function resizeRendererToDisplaySize(renderer) {
-        const canvas = renderer.domElement;
-        const width = canvas.clientWidth;
-        const height = canvas.clientHeight;
-        const needResize = canvas.width !== width || canvas.height !== height;
-        if (needResize) {
-            renderer.setSize(width, height, false);
-        }
-        return needResize;
-    }
-
     const jewels = []
     {
         const jewelGeo = new THREE.IcosahedronGeometry();
@@ -287,22 +276,18 @@ function main() {
     }
 
 
-    function render() {
+    window.addEventListener( 'resize', onWindowResize );
 
-        helpers.forEach((helper) => {
-            helper.update();
-        });
+    function onWindowResize() {
 
-        resizeRendererToDisplaySize(renderer);
-
-
-        // adjust the camera for this aspect
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
-        cameraHelper.update();
 
-        // don't draw the camera helper
-        cameraHelper.visible = false;
+        renderer.setSize( window.innerWidth, window.innerHeight );
+
+    }
+
+    function render() {
 
         {
             const color = 0xd9c896;
