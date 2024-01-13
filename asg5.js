@@ -23,9 +23,9 @@ function main() {
 
     const cameraHelper = new THREE.CameraHelper(camera);
 
-    const controls = new OrbitControls(camera, view1Elem);
-    controls.target.set(0, 5, 0);
-    controls.update();
+    // const controls = new OrbitControls(camera, view1Elem);
+    // controls.target.set(0, 5, 0);
+    // controls.update();
 
     const scene = new THREE.Scene();
     scene.rotation.y =  -45 * Math.PI / 180
@@ -88,7 +88,6 @@ function main() {
 
     {
         const ambientColor = 0xd9c896;
-        // const groundColor = 0x3f7840;
         const intensity = .2;
         const light = new THREE.AmbientLight(ambientColor, intensity);
         scene.add(light);
@@ -113,12 +112,10 @@ function main() {
         scene.add(light.target);
 
         const helper = new THREE.DirectionalLightHelper(light);
-        // scene.add(helper);
         const cameraHelper = new THREE.CameraHelper(light.shadow.camera);
 
         helpers.push(cameraHelper);
 
-        // scene.add(cameraHelper);
     }
 
     {
@@ -171,7 +168,6 @@ function main() {
                 root.rotation.y = 90 * Math.PI / 180;
                 base.add(root);
                 ship = root;
-                // scene.add(root);
             });
         })
 
@@ -227,9 +223,6 @@ function main() {
     camera2.lookAt(5, 1, -5);
     base.add(camera2)
 
-    // const controls2 = new OrbitControls(camera2, view2Elem);
-    // controls2.target.set(0, 5, 0);
-    // controls2.update();
 
     function setScissorForElement(elem) {
         const canvasRect = canvas.getBoundingClientRect();
@@ -303,10 +296,8 @@ function main() {
         base.add(light.target);
         spotLights.push(light);
         const helper = new THREE.SpotLightHelper(light);
-        // scene.add(helper);
         helpers.push(helper);
         const cameraHelper = new THREE.CameraHelper(light.shadow.camera);
-        // scene.add(cameraHelper);
         helpers.push(cameraHelper);
     }
 
@@ -324,10 +315,8 @@ function main() {
         base.add(light.target);
         spotLights.push(light);
         const helper = new THREE.SpotLightHelper(light);
-        // scene.add(helper);
         helpers.push(helper);
         const cameraHelper = new THREE.CameraHelper(light.shadow.camera);
-        // scene.add(cameraHelper);
         helpers.push(cameraHelper);
     }
 
@@ -348,7 +337,6 @@ function main() {
             const speed = 1 + ndx * .1;
             const ele = Math.sin(time + ndx) * speed / 2 + 10.5;
             light.position.y = ele;
-            // light.position.updateMatrixWorld();
         });
 
         base.position.x = time % 40 - 20;
