@@ -1,7 +1,5 @@
 import Renderer from '../common/Renderer.js';
-import WebGLBackend from '../webgl/WebGLBackend.js';
 import WebGPUBackend from './WebGPUBackend.js';
-import WebGPU from '../../capabilities/WebGPU.js';
 /*
 const debugHandler = {
 
@@ -20,24 +18,10 @@ class WebGPURenderer extends Renderer {
 
 	constructor( parameters = {} ) {
 
-		let BackendClass;
+		const backend = new WebGPUBackend( parameters );
+		//const backend = new Proxy( new WebGPUBackend( parameters ), debugHandler );
 
-		if ( WebGPU.isAvailable() ) {
-
-			BackendClass = WebGPUBackend;
-
-		} else {
-
-			BackendClass = WebGLBackend;
-
-			console.warn( 'THREE.WebGPURenderer: WebGPU is not available, running under WebGL2 backend.' );
-
-		}
-
-		const backend = new BackendClass( parameters );
-
-		//super( new Proxy( backend, debugHandler ) );
-		super( backend, parameters );
+		super( backend );
 
 		this.isWebGPURenderer = true;
 

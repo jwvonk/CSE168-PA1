@@ -16,6 +16,8 @@ class Bindings extends DataMap {
 
 		this.pipelines.bindings = this; // assign bindings to pipelines
 
+		this.updateMap = new WeakMap();
+
 	}
 
 	getForRender( renderObject ) {
@@ -32,7 +34,9 @@ class Bindings extends DataMap {
 
 			this._init( bindings );
 
-			this.backend.createBindings( bindings );
+			const pipeline = this.pipelines.getForRender( renderObject );
+
+			this.backend.createBindings( bindings, pipeline );
 
 		}
 
@@ -46,15 +50,17 @@ class Bindings extends DataMap {
 
 		if ( data.bindings === undefined ) {
 
-			const nodeBuilderState = this.nodes.getForCompute( computeNode );
+			const nodeBuilder = this.nodes.getForCompute( computeNode );
 
-			const bindings = nodeBuilderState.bindings.compute;
+			const bindings = nodeBuilder.getBindings();
 
 			data.bindings = bindings;
 
 			this._init( bindings );
 
-			this.backend.createBindings( bindings );
+			const pipeline = this.pipelines.getForCompute( computeNode );
+
+			this.backend.createBindings( bindings, pipeline );
 
 		}
 
@@ -78,7 +84,7 @@ class Bindings extends DataMap {
 
 		for ( const binding of bindings ) {
 
-			if ( binding.isSampledTexture ) {
+			if ( binding.isSampler || binding.isSampledTexture ) {
 
 				this.textures.updateTexture( binding.texture );
 
@@ -98,25 +104,25 @@ class Bindings extends DataMap {
 
 		const { backend } = this;
 
+		const updateMap = this.updateMap;
+		const frame = this.info.render.frame;
+
 		let needsBindingsUpdate = false;
 
 		// iterate over all bindings and check if buffer updates or a new binding group is required
 
 		for ( const binding of bindings ) {
 
-			if ( binding.isNodeUniformsGroup ) {
+			const isShared = binding.isShared;
+			const isUpdated = updateMap.get( binding ) === frame;
 
-				const updated = this.nodes.updateGroup( binding );
-
-				if ( ! updated ) continue;
-
-			}
+			if ( isShared && isUpdated ) continue;
 
 			if ( binding.isUniformBuffer ) {
 
-				const updated = binding.update();
+				const needsUpdate = binding.update();
 
-				if ( updated ) {
+				if ( needsUpdate ) {
 
 					backend.updateBinding( binding );
 
@@ -124,37 +130,19 @@ class Bindings extends DataMap {
 
 			} else if ( binding.isSampledTexture ) {
 
-				const texture = binding.texture;
-
 				if ( binding.needsBindingsUpdate ) needsBindingsUpdate = true;
 
-				const updated = binding.update();
+				const needsUpdate = binding.update();
 
-				if ( updated ) {
+				if ( needsUpdate ) {
 
 					this.textures.updateTexture( binding.texture );
 
 				}
 
-				if ( texture.isStorageTexture === true ) {
-
-					const textureData = this.get( texture );
-
-					if ( binding.store === true ) {
-
-						textureData.needsMipmap = true;
-
-					} else if ( texture.generateMipmaps === true && this.textures.needsMipmaps( texture ) && textureData.needsMipmap === true ) {
-
-						this.backend.generateMipmaps( texture );
-
-						textureData.needsMipmap = false;
-
-					}
-
-				}
-
 			}
+
+			updateMap.set( binding, frame );
 
 		}
 
@@ -165,6 +153,14 @@ class Bindings extends DataMap {
 			this.backend.updateBindings( bindings, pipeline );
 
 		}
+
+	}
+
+	dispose() {
+
+		super.dispose();
+
+		this.updateMap = new WeakMap();
 
 	}
 

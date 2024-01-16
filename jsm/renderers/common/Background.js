@@ -1,9 +1,9 @@
 import DataMap from './DataMap.js';
-import Color4 from './Color4.js';
-import { Mesh, SphereGeometry, BackSide } from 'three';
-import { vec4, context, normalWorld, backgroundBlurriness, backgroundIntensity, NodeMaterial, modelViewProjection } from '../../nodes/Nodes.js';
+import { Color, Mesh, BoxGeometry, BackSide } from 'three';
+import { context, positionWorldDirection, MeshBasicNodeMaterial } from '../../nodes/Nodes.js';
 
-const _clearColor = new Color4();
+let _clearAlpha;
+const _clearColor = new Color();
 
 class Background extends DataMap {
 
@@ -14,12 +14,15 @@ class Background extends DataMap {
 		this.renderer = renderer;
 		this.nodes = nodes;
 
+		this.boxMesh = null;
+		this.boxMeshNode = null;
+
 	}
 
 	update( scene, renderList, renderContext ) {
 
 		const renderer = this.renderer;
-		const background = this.nodes.getBackgroundNode( scene ) || scene.background;
+		const background = ( scene.isScene === true ) ? this.nodes.getBackgroundNode( scene ) || scene.background : null;
 
 		let forceClear = false;
 
@@ -27,16 +30,15 @@ class Background extends DataMap {
 
 			// no background settings, use clear color configuration from the renderer
 
-			renderer._clearColor.getRGB( _clearColor, this.renderer.currentColorSpace );
-			_clearColor.a = renderer._clearColor.a;
+			_clearColor.copy( renderer._clearColor );
+			_clearAlpha = renderer._clearAlpha;
 
 		} else if ( background.isColor === true ) {
 
 			// background is an opaque color
 
-			background.getRGB( _clearColor, this.renderer.currentColorSpace );
-			_clearColor.a = 1;
-
+			_clearColor.copy( background );
+			_clearAlpha = 1;
 			forceClear = true;
 
 		} else if ( background.isNode === true ) {
@@ -45,35 +47,32 @@ class Background extends DataMap {
 			const backgroundNode = background;
 
 			_clearColor.copy( renderer._clearColor );
+			_clearAlpha = renderer._clearAlpha;
 
-			let backgroundMesh = sceneData.backgroundMesh;
+			let boxMesh = this.boxMesh;
 
-			if ( backgroundMesh === undefined ) {
+			if ( boxMesh === null ) {
 
-				const backgroundMeshNode = context( vec4( backgroundNode ), {
+				this.boxMeshNode = context( backgroundNode, {
 					// @TODO: Add Texture2D support using node context
-					getUV: () => normalWorld,
-					getTextureLevel: () => backgroundBlurriness
-				} ).mul( backgroundIntensity );
+					getUVNode: () => positionWorldDirection
+				} );
 
-				let viewProj = modelViewProjection();
-				viewProj = viewProj.setZ( viewProj.w );
-
-				const nodeMaterial = new NodeMaterial();
+				const nodeMaterial = new MeshBasicNodeMaterial();
+				nodeMaterial.colorNode = this.boxMeshNode;
 				nodeMaterial.side = BackSide;
 				nodeMaterial.depthTest = false;
 				nodeMaterial.depthWrite = false;
 				nodeMaterial.fog = false;
-				nodeMaterial.vertexNode = viewProj;
-				nodeMaterial.fragmentNode = backgroundMeshNode;
 
-				sceneData.backgroundMeshNode = backgroundMeshNode;
-				sceneData.backgroundMesh = backgroundMesh = new Mesh( new SphereGeometry( 1, 32, 32 ), nodeMaterial );
-				backgroundMesh.frustumCulled = false;
+				this.boxMesh = boxMesh = new Mesh( new BoxGeometry( 1, 1, 1 ), nodeMaterial );
+				boxMesh.frustumCulled = false;
 
-				backgroundMesh.onBeforeRender = function ( renderer, scene, camera ) {
+				boxMesh.onBeforeRender = function ( renderer, scene, camera ) {
 
-					this.matrixWorld.copyPosition( camera.matrixWorld );
+					const scale = camera.far;
+
+					this.matrixWorld.makeScale( scale, scale, scale ).copyPosition( camera.matrixWorld );
 
 				};
 
@@ -83,15 +82,15 @@ class Background extends DataMap {
 
 			if ( sceneData.backgroundCacheKey !== backgroundCacheKey ) {
 
-				sceneData.backgroundMeshNode.node = vec4( backgroundNode );
+				this.boxMeshNode.node = backgroundNode;
 
-				backgroundMesh.material.needsUpdate = true;
+				boxMesh.material.needsUpdate = true;
 
 				sceneData.backgroundCacheKey = backgroundCacheKey;
 
 			}
 
-			renderList.unshift( backgroundMesh, backgroundMesh.geometry, backgroundMesh.material, 0, 0, null );
+			renderList.unshift( boxMesh, boxMesh.geometry, boxMesh.material, 0, 0, null );
 
 		} else {
 
@@ -103,14 +102,14 @@ class Background extends DataMap {
 
 		if ( renderer.autoClear === true || forceClear === true ) {
 
-			_clearColor.multiplyScalar( _clearColor.a );
+			_clearColor.multiplyScalar( _clearAlpha );
 
 			const clearColorValue = renderContext.clearColorValue;
 
 			clearColorValue.r = _clearColor.r;
 			clearColorValue.g = _clearColor.g;
 			clearColorValue.b = _clearColor.b;
-			clearColorValue.a = _clearColor.a;
+			clearColorValue.a = _clearAlpha;
 
 			renderContext.depthClearValue = renderer._clearDepth;
 			renderContext.stencilClearValue = renderer._clearStencil;
