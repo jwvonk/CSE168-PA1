@@ -225,67 +225,18 @@ function main() {
       const objLoader = new OBJLoader();
       objLoader.setMaterials(mtl);
       objLoader.load("assets/pirateship/model.obj", (root) => {
-        root.castShadow = true;
         root.scale.set(4, 4, 4);
         root.position.set(0, 1, 0);
         root.rotation.y = (90 * Math.PI) / 180;
         base.add(root);
+        root.traverse((child) => {
+          child.castShadow = true;
+          child.receiveShadow = true});
         ship = root;
       });
     });
   }
 
-  {
-    const hullMat = new THREE.MeshBasicMaterial({
-      transparent: true,
-      opacity: 0,
-    });
-    const hullGeo = new THREE.BoxGeometry(3, 0.8, 1);
-    const mesh = new THREE.Mesh(hullGeo, hullMat);
-    mesh.castShadow = true;
-    mesh.rotation.y = (43 * Math.PI) / 180;
-    mesh.position.set(0.3, 0.4, -0.3);
-    base.add(mesh);
-  }
-
-  {
-    const flag1Mat = new THREE.MeshBasicMaterial({
-      transparent: true,
-      opacity: 0,
-    });
-    const flag1Geo = new THREE.BoxGeometry(0.05, 1.1, 1.1);
-    const mesh = new THREE.Mesh(flag1Geo, flag1Mat);
-    mesh.castShadow = true;
-    mesh.rotation.y = (55 * Math.PI) / 180;
-    mesh.position.set(-0.3, 1.7, 0.1);
-    base.add(mesh);
-  }
-
-  {
-    const flag2Mat = new THREE.MeshBasicMaterial({
-      transparent: true,
-      opacity: 0,
-    });
-    const flag2Geo = new THREE.BoxGeometry(0.05, 1.3, 1.3);
-    const mesh = new THREE.Mesh(flag2Geo, flag2Mat);
-    mesh.castShadow = true;
-    mesh.rotation.y = (50 * Math.PI) / 180;
-    mesh.position.set(0, 2.1, -0.3);
-    base.add(mesh);
-  }
-
-  {
-    const flag3Mat = new THREE.MeshBasicMaterial({
-      transparent: true,
-      opacity: 0,
-    });
-    const flag3Geo = new THREE.BoxGeometry(0.05, 0.9, 1.2);
-    const mesh = new THREE.Mesh(flag3Geo, flag3Mat);
-    mesh.castShadow = true;
-    mesh.rotation.y = (47 * Math.PI) / 180;
-    mesh.position.set(0.6, 1.7, -0.7);
-    base.add(mesh);
-  }
 
   function render(time) {
     time *= 0.001; // convert time to seconds
