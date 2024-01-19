@@ -1,9 +1,9 @@
-import * as THREE from "./lib/three.module.js";
+import * as THREE from "three";
 import { OrbitControls } from "./lib/OrbitControls.js";
 import { OBJLoader } from "./lib/OBJLoader.js";
 import { MTLLoader } from "./lib/MTLLoader.js";
 import { Lensflare, LensflareElement } from "./lib/Lensflare.js";
-
+import { VRButton } from 'three/addons/webxr/VRButton.js';
 
 let cam;
 let scene;
@@ -16,6 +16,8 @@ function init() {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   document.body.appendChild(renderer.domElement);
+  document.body.appendChild( VRButton.createButton( renderer ) );
+  renderer.xr.enabled = true;
 
   scene = new THREE.Scene();
 
@@ -592,9 +594,7 @@ let g_seconds = performance.now()/1000.0-g_startTime;
 
 function animate() {
   g_seconds = performance.now()/1000.0 -g_startTime;
-  requestAnimationFrame(animate);
   orbitControls.update();
-  renderer.render(scene, cam);
   if(rotAng <=-0.5 && check == 0){
     rotAng += 0.005
     catTail.rotation.z = rotAng;
@@ -610,8 +610,11 @@ function animate() {
   spirit.position.z = 20*Math.cos(g_seconds*3);
   sparklight.position.x = 20*Math.sin(g_seconds*3);
   sparklight.position.z = 20*Math.cos(g_seconds*3);
+  renderer.render(scene, cam);
 }
+
+renderer.setAnimationLoop(animate);
 
 console.log(scene);
 
-animate();
+// animate();
