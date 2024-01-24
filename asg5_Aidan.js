@@ -149,7 +149,7 @@ camera.position.y = 10;
 const pickHelper = new PickHelper();
 camera.lookAt(new THREE.Vector3(3,5,3))
 const cameraGroup = new THREE.Object3D()
-cameraGroup.position.set(0,2,0)
+cameraGroup.position.set(0,1,0)
 cameraGroup.add(camera)
 scene.add(cameraGroup)
 
