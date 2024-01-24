@@ -21,11 +21,15 @@ function main() {
   const aspect = canvas.clientWidth / canvas.clientHeight;
   const near = 0.1;
   const far = 50;
+
   const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-  camera.position.set(1, 5, -1);
   const cameraHelper = new THREE.CameraHelper(camera);
   helpers.push(cameraHelper);
-  base.add(camera);
+
+  const cameraGroup = new THREE.Object3D();
+  cameraGroup.position.set(1, 5, -1);
+  cameraGroup.add(camera)
+  base.add(cameraGroup);
 
   const scene = new THREE.Scene();
   {
