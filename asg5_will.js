@@ -231,12 +231,12 @@ function main() {
         base.add(root);
         root.traverse((child) => {
           child.castShadow = true;
-          child.receiveShadow = true});
+          child.receiveShadow = true;
+        });
         ship = root;
       });
     });
   }
-
 
   function render(time) {
     time *= 0.001; // convert time to seconds
@@ -248,11 +248,12 @@ function main() {
     }
 
     // Debug
+    let visible = false;
     helpers.forEach((helper) => {
-      if (helper.parent == null) {
+      if (helper.visible != visible) {
+        helper.visible = visible;
+        helper.update();
       }
-      helper.visible = true;
-      helper.update();
     });
 
     jewels.forEach((jewel, ndx) => {
@@ -268,7 +269,6 @@ function main() {
       const speed = 1 + ndx * 0.1;
       const ele = (Math.sin(time + ndx) * speed) / 2 + 10.5;
       light.position.y = ele;
-      
     });
 
     base.position.x = (time % 40) - 20;
