@@ -3,13 +3,7 @@ import {OBJLoader} from 'three/addons/loaders/OBJLoader.js';
 import {MTLLoader} from 'three/addons/loaders/MTLLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
 import { VRButton } from 'three/addons/webxr/VRButton.js'
-document.body.appendChild( VRButton.createButton( renderer ) );
-renderer.xr.enabled = true;
-renderer.setAnimationLoop( function () {
 
-	renderer.render( scene, camera );
-
-} );
 class PickHelper {
     constructor() {
       this.raycaster = new THREE.Raycaster();
@@ -32,19 +26,19 @@ class PickHelper {
     }
   }
 
-  function getCanvasRelativePosition(event) {
+  /*function getCanvasRelativePosition(event) {
     const rect = canvas.getBoundingClientRect();
     return {
       x: (event.clientX - rect.left) * canvas.width  / rect.width,
       y: (event.clientY - rect.top ) * canvas.height / rect.height,
     };
-  }
+  }*/
    
-  function setPickPosition(event) {
+  /*function setPickPosition(event) {
     const pos = getCanvasRelativePosition(event);
     pickPosition.x = (pos.x / canvas.width ) *  2 - 1;
     pickPosition.y = (pos.y / canvas.height) * -2 + 1;  // note we flip Y
-  }
+  }*/
 
   function mine(event) {
     if (event.shiftKey) {
@@ -62,10 +56,10 @@ class PickHelper {
     pickPosition.y = -100000;
   }
    
-  window.addEventListener('mousemove', setPickPosition);
-  window.addEventListener('mouseout', clearPickPosition);
-  window.addEventListener('mouseleave', clearPickPosition);
-  window.addEventListener('pointerdown', mine);
+  //window.addEventListener('mousemove', setPickPosition);
+  //window.addEventListener('mouseout', clearPickPosition);
+  //window.addEventListener('mouseleave', clearPickPosition);
+  //window.addEventListener('pointerdown', mine);
 function render(time) {
 
     time *= 0.001;
@@ -97,10 +91,10 @@ function makeCube(geometry, x,y,z, id1,id2,id3,id4,id5,id6) {
 
 const objLoader = new OBJLoader();
 const mtlLoader = new MTLLoader();
-mtlLoader.load('/obj/Steve/Steve.mtl', (mtl) => {
+mtlLoader.load('assets/obj/Steve/Steve.mtl', (mtl) => {
     mtl.preload();
     objLoader.setMaterials(mtl);
-    objLoader.load('/obj/Steve/Steve.obj', (root) => {
+    objLoader.load('assets/obj/Steve/Steve.obj', (root) => {
         root.position.x = 2;
         root.position.z = 6;
         root.position.y = 1.4;
@@ -111,7 +105,7 @@ mtlLoader.load('/obj/Steve/Steve.mtl', (mtl) => {
         root.castShadow = true;
         root.receiveShadow = true;
         const labelMaterial = new THREE.SpriteMaterial({
-            map: loader.load('/textures/Username.png')
+            map: loader.load('assets/textures/Username.png')
         });
         const label = new THREE.Sprite(labelMaterial);
         root.add(label);
@@ -124,8 +118,13 @@ mtlLoader.load('/obj/Steve/Steve.mtl', (mtl) => {
 });
 
 const canvas = document.querySelector('#c');
-const renderer = new THREE.WebGLRenderer({antialias: true, canvas});
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+document.body.appendChild( VRButton.createButton( renderer ) );
+renderer.xr.enabled = true;
 const loadManager = new THREE.LoadingManager();
 const loader = new THREE.TextureLoader(loadManager);
 const fov = 75;
@@ -141,7 +140,7 @@ const boxDepth = 1;
 const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
 const cylGeo = new THREE.CylinderGeometry(boxWidth, boxHeight, boxDepth);
 const sphereGeo = new THREE.SphereGeometry(boxWidth);
-const controls = new OrbitControls(camera, canvas);
+const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 5, 0);
 controls.update();
 camera.position.x = 1;
@@ -152,6 +151,11 @@ camera.lookAt(new THREE.Vector3(3,5,3))
 
 const pickPosition = {x: 0, y: 0};
 clearPickPosition();
+renderer.setAnimationLoop( function () {
+
+	renderer.render( scene, camera );
+
+} );
 renderer.render(scene, camera);
 
 const sunMat = new THREE.MeshBasicMaterial();
@@ -175,15 +179,15 @@ light.position.set(sun.position.x, sun.position.y, sun.position.z);
 
 scene.add(light);
 const materialList = [
-    new THREE.MeshPhongMaterial({map: loader.load('/textures/BlockTextures/cobblestone.png')}), //0 
-    new THREE.MeshPhongMaterial({map: loader.load('/textures/BlockTextures/dirt.png')}),        //1
-    new THREE.MeshPhongMaterial({map: loader.load('/textures/BlockTextures/grass_top.png')}),   //2
-    new THREE.MeshPhongMaterial({map: loader.load('/textures/BlockTextures/leaves_oak.png')}),  //3
-    new THREE.MeshPhongMaterial({map: loader.load('/textures/BlockTextures/log_oak.png')}),     //4
-    new THREE.MeshPhongMaterial({map: loader.load('/textures/BlockTextures/log_oak_top.png')}), //5
-    new THREE.MeshPhongMaterial({map: loader.load('/textures/BlockTextures/planks_oak.png')}),  //6
+    new THREE.MeshPhongMaterial({map: loader.load('assets/textures/BlockTextures/cobblestone.png')}), //0 
+    new THREE.MeshPhongMaterial({map: loader.load('assets/textures/BlockTextures/dirt.png')}),        //1
+    new THREE.MeshPhongMaterial({map: loader.load('assets/textures/BlockTextures/grass_top.png')}),   //2
+    new THREE.MeshPhongMaterial({map: loader.load('assets/textures/BlockTextures/leaves_oak.png')}),  //3
+    new THREE.MeshPhongMaterial({map: loader.load('assets/textures/BlockTextures/log_oak.png')}),     //4
+    new THREE.MeshPhongMaterial({map: loader.load('assets/textures/BlockTextures/log_oak_top.png')}), //5
+    new THREE.MeshPhongMaterial({map: loader.load('assets/textures/BlockTextures/planks_oak.png')}),  //6
 ];
-let ground = makeGround(32,4,32);
+let ground = makeGround(16,4,16);
 const cubes = [
     makeCube(geometry, 0,1,5, 4,4,5,5,4,4),
     makeCube(geometry, 0,2,5, 4,4,5,5,4,4),
@@ -325,11 +329,11 @@ function makeGround(width, height, depth) {
         for (let y = -3; y < height - 3; y++) {
             for (let z = -13; z < depth - 13; z++) {
                 if (y == height - 4) {
-                    ground.push(makeCube(geometry, x,y,z, 1,1,2,1,1,1));
+                    ground.push(makeCube(geometry, x+8,y,z+8, 1,1,2,1,1,1));
                 }
 
                 else {
-                    ground.push(makeCube(geometry, x,y,z, 0,0,0,0,0,0));
+                    ground.push(makeCube(geometry, x+8,y,z+8, 0,0,0,0,0,0));
                 }
 
             }
@@ -341,12 +345,12 @@ function makeGround(width, height, depth) {
 {
     const cubeMapLoader = new THREE.CubeTextureLoader();
     const texture = cubeMapLoader.load([
-        "/textures/Skybox/Daylight Box_Right.bmp",
-        "/textures/Skybox/Daylight Box_Left.bmp",
-        "/textures/Skybox/Daylight Box_Top.bmp",
-        "/textures/Skybox/Daylight Box_Bottom.bmp",
-        "/textures/Skybox/Daylight Box_Front.bmp",
-        "/textures/Skybox/Daylight Box_Back.bmp",
+        "assets/textures/Skybox/Daylight Box_Right.bmp",
+        "assets/textures/Skybox/Daylight Box_Left.bmp",
+        "assets/textures/Skybox/Daylight Box_Top.bmp",
+        "assets/textures/Skybox/Daylight Box_Bottom.bmp",
+        "assets/textures/Skybox/Daylight Box_Front.bmp",
+        "assets/textures/Skybox/Daylight Box_Back.bmp",
     ]);
     scene.background = texture;
 }
