@@ -32,7 +32,7 @@ function init() {
   // cam.position.x = 300;
 
   const cameraGroup = new THREE.Object3D();
-  cameraGroup.position.set(300, 1000, 300);
+  cameraGroup.position.set(300, 150, 300);
   cameraGroup.add(cam);
   scene.add(cameraGroup);
 
