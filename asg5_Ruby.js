@@ -28,7 +28,7 @@ function init() {
     5000
   );
   cam.position.z = 300;
-  cam.position.y = 300;
+  cam.position.y = 1000;
   cam.position.x = 300;
 
   orbitControls = new OrbitControls(cam, renderer.domElement);
