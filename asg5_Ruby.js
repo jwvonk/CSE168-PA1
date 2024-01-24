@@ -27,9 +27,14 @@ function init() {
     1,
     5000
   );
-  cam.position.z = 300;
-  cam.position.y = 1000;
-  cam.position.x = 300;
+  // cam.position.z = 300;
+  // cam.position.y = 1000;
+  // cam.position.x = 300;
+
+  const cameraGroup = new THREE.Object3D();
+  cameraGroup.position.set(300, 1000, 300);
+  cameraGroup.add(cam);
+  scene.add(cameraGroup);
 
   orbitControls = new OrbitControls(cam, renderer.domElement);
   orbitControls.update();
