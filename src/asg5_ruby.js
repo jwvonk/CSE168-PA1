@@ -1,8 +1,8 @@
 import * as THREE from "three";
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
-import { MTLLoader } from "three/addons/loaders/MTLLoader.js";
-import { Lensflare, LensflareElement } from "three/addons/objects/Lensflare.js";
+import { OrbitControls } from "./lib/OrbitControls.js";
+import { OBJLoader } from "./lib/OBJLoader.js";
+import { MTLLoader } from "./lib/MTLLoader.js";
+import { Lensflare, LensflareElement } from "./lib/Lensflare.js";
 import { VRButton } from 'three/addons/webxr/VRButton.js';
 
 let cam;
@@ -49,18 +49,18 @@ init();
 window.addEventListener("resize", onWindowResize, false);
 
 // Loaded textures
-const stairTexture = new THREE.TextureLoader().load("../assets/Ruby/textures/stair.jpg");
-const groundTexture = new THREE.TextureLoader().load("../assets/Ruby/textures/ground.png");
-const grassTexture = new THREE.TextureLoader().load("../assets/Ruby/textures/grass.jpg");
+const stairTexture = new THREE.TextureLoader().load("../assets/textures/stair.jpg");
+const groundTexture = new THREE.TextureLoader().load("../assets/textures/ground.png");
+const grassTexture = new THREE.TextureLoader().load("../assets/textures/grass.jpg");
 
 const loader = new THREE.CubeTextureLoader();
 const texture = loader.load([
-  '../assets/Ruby/textures/posx.jpg',
-  '../assets/Ruby/textures/negx.jpg',
-  '../assets/Ruby/textures/posy.jpg',
-  '../assets/Ruby/textures/negy.jpg',
-  '../assets/Ruby/textures/posz.jpg',
-  '../assets/Ruby/textures/negz.jpg',
+  '../assets/textures/posx.jpg',
+  '../assets/textures/negx.jpg',
+  '../assets/textures/posy.jpg',
+  '../assets/textures/negy.jpg',
+  '../assets/textures/posz.jpg',
+  '../assets/textures/negz.jpg',
 ]);
 scene.background = texture;
 
@@ -153,11 +153,11 @@ const sides = [
   [-400, -2000, 4.71],
 ];
 sides.map((side, index) => {
-  mtlLoader.load("../assets/Ruby/obj/materials.mtl", (materials) => {
+  mtlLoader.load("../assets/obj/materials.mtl", (materials) => {
     materials.preload();
     const objLoader = new OBJLoader();
     objLoader.setMaterials(materials);
-    objLoader.load("../assets/Ruby/obj/model.obj", (lamp) => {
+    objLoader.load("../assets/obj/model.obj", (lamp) => {
       lamp.scale.set(100, 100, 100);
       lamp.position.set(side[0], 230, side[1]);
       lamp.rotation.y = side[2];
@@ -342,11 +342,11 @@ longfences.map((place, index) =>{
 
 //Gazebo Object
 
-mtlLoader.load("../assets/Ruby/obj/10073_Gazebo_V2_L3.mtl", (materials) => {
+mtlLoader.load("../assets/obj/10073_Gazebo_V2_L3.mtl", (materials) => {
   materials.preload();
   const objLoader = new OBJLoader();
   objLoader.setMaterials(materials);
-  objLoader.load("../assets/Ruby/obj/10073_Gazebo_V2_L3.obj", (gazebo) => {
+  objLoader.load("../assets/obj/10073_Gazebo_V2_L3.obj", (gazebo) => {
     gazebo.scale.set(1, 1, 1);
     gazebo.rotation.x = 67.55;
     gazebo.position.set(0, 50, 0);
@@ -578,8 +578,8 @@ scene.add( spirit );
 
 //making sparkly tiny lensflare
 const flareLoader = new THREE.TextureLoader();
-const flareTex0 = flareLoader.load('../assets/Ruby/textures/lensflare0.png');
-const flareTex3 = flareLoader.load('../assets/Ruby/textures/lensflare3.png');
+const flareTex0 = flareLoader.load('../assets/textures/lensflare0.png');
+const flareTex3 = flareLoader.load('../assets/textures/lensflare3.png');
 
 const sparklight = new THREE.PointLight(0xffffff, 1.5, 2000);
 sparklight.color.setHSL(0.1, 1, 0.56);
