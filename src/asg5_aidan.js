@@ -91,10 +91,10 @@ function makeCube(geometry, x,y,z, id1,id2,id3,id4,id5,id6) {
 
 const objLoader = new OBJLoader();
 const mtlLoader = new MTLLoader();
-mtlLoader.load('assets/obj/Steve/Steve.mtl', (mtl) => {
+mtlLoader.load('../assets/Aidan/Steve/Steve.mtl', (mtl) => {
     mtl.preload();
     objLoader.setMaterials(mtl);
-    objLoader.load('assets/obj/Steve/Steve.obj', (root) => {
+    objLoader.load('../assets/Aidan/Steve/Steve.obj', (root) => {
         root.position.x = 2;
         root.position.z = 6;
         root.position.y = 1.4;
@@ -105,7 +105,7 @@ mtlLoader.load('assets/obj/Steve/Steve.mtl', (mtl) => {
         root.castShadow = true;
         root.receiveShadow = true;
         const labelMaterial = new THREE.SpriteMaterial({
-            map: loader.load('assets/textures/Username.png')
+            map: loader.load('../assets/Aidan/textures/Username.png')
         });
         const label = new THREE.Sprite(labelMaterial);
         root.add(label);
@@ -183,13 +183,13 @@ light.position.set(sun.position.x, sun.position.y, sun.position.z);
 
 scene.add(light);
 const materialList = [
-    new THREE.MeshPhongMaterial({map: loader.load('assets/textures/BlockTextures/cobblestone.png')}), //0 
-    new THREE.MeshPhongMaterial({map: loader.load('assets/textures/BlockTextures/dirt.png')}),        //1
-    new THREE.MeshPhongMaterial({map: loader.load('assets/textures/BlockTextures/grass_top.png')}),   //2
-    new THREE.MeshPhongMaterial({map: loader.load('assets/textures/BlockTextures/leaves_oak.png')}),  //3
-    new THREE.MeshPhongMaterial({map: loader.load('assets/textures/BlockTextures/log_oak.png')}),     //4
-    new THREE.MeshPhongMaterial({map: loader.load('assets/textures/BlockTextures/log_oak_top.png')}), //5
-    new THREE.MeshPhongMaterial({map: loader.load('assets/textures/BlockTextures/planks_oak.png')}),  //6
+    new THREE.MeshPhongMaterial({map: loader.load('../assets/Aidan/textures/BlockTextures/cobblestone.png')}), //0 
+    new THREE.MeshPhongMaterial({map: loader.load('../assets/Aidan/textures/BlockTextures/dirt.png')}),        //1
+    new THREE.MeshPhongMaterial({map: loader.load('../assets/Aidan/textures/BlockTextures/grass_top.png')}),   //2
+    new THREE.MeshPhongMaterial({map: loader.load('../assets/Aidan/textures/BlockTextures/leaves_oak.png')}),  //3
+    new THREE.MeshPhongMaterial({map: loader.load('../assets/Aidan/textures/BlockTextures/log_oak.png')}),     //4
+    new THREE.MeshPhongMaterial({map: loader.load('../assets/Aidan/textures/BlockTextures/log_oak_top.png')}), //5
+    new THREE.MeshPhongMaterial({map: loader.load('../assets/Aidan/textures/BlockTextures/planks_oak.png')}),  //6
 ];
 let ground = makeGround(16,4,16);
 const cubes = [
@@ -349,12 +349,12 @@ function makeGround(width, height, depth) {
 {
     const cubeMapLoader = new THREE.CubeTextureLoader();
     const texture = cubeMapLoader.load([
-        "assets/textures/Skybox/Daylight Box_Right.bmp",
-        "assets/textures/Skybox/Daylight Box_Left.bmp",
-        "assets/textures/Skybox/Daylight Box_Top.bmp",
-        "assets/textures/Skybox/Daylight Box_Bottom.bmp",
-        "assets/textures/Skybox/Daylight Box_Front.bmp",
-        "assets/textures/Skybox/Daylight Box_Back.bmp",
+        "../assets/Aidan/textures/Skybox/Daylight Box_Right.bmp",
+        "../assets/Aidan/textures/Skybox/Daylight Box_Left.bmp",
+        "../assets/Aidan/textures/Skybox/Daylight Box_Top.bmp",
+        "../assets/Aidan/textures/Skybox/Daylight Box_Bottom.bmp",
+        "../assets/Aidan/textures/Skybox/Daylight Box_Front.bmp",
+        "../assets/Aidan/textures/Skybox/Daylight Box_Back.bmp",
     ]);
     scene.background = texture;
 }

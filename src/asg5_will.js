@@ -27,14 +27,14 @@ function main() {
   helpers.push(cameraHelper);
 
   const cameraGroup = new THREE.Object3D();
-  cameraGroup.position.set(1, 5, -1);
+  cameraGroup.position.set(1, 1, -1);
   cameraGroup.add(camera)
   base.add(cameraGroup);
 
   const scene = new THREE.Scene();
   {
     const loader = new THREE.TextureLoader();
-    const texture = loader.load("assets/goegap_2k.jpg", () => {
+    const texture = loader.load("../assets/Will/goegap_2k.jpg", () => {
       const rt = new THREE.WebGLCubeRenderTarget(texture.image.height);
       rt.fromEquirectangularTexture(renderer, texture);
       scene.background = rt.texture;
@@ -53,26 +53,18 @@ function main() {
 
   {
     const planeSize = 100;
-
     const loader = new THREE.TextureLoader();
-    const texture = loader.load("assets/sand.png");
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    texture.magFilter = THREE.NearestFilter;
-    const repeats = planeSize;
-    texture.repeat.set(repeats, repeats);
-
-    const disp = loader.load("assets/aerial_beach_01_disp_2k.jpg");
+    const disp = loader.load("../assets/Will/aerial_beach_01_disp_2k.jpg");
     disp.wrapS = THREE.RepeatWrapping;
     disp.wrapT = THREE.RepeatWrapping;
     disp.magFilter = THREE.NearestFilter;
-    disp.repeat.set(repeats / 32, repeats / 32);
+    disp.repeat.set(planeSize / 32, planeSize / 32);
 
-    const norm = loader.load("assets/aerial_beach_01_nor_gl_2k.jpg");
+    const norm = loader.load("../assets/Will/aerial_beach_01_nor_gl_2k.jpg");
     norm.wrapS = THREE.RepeatWrapping;
     norm.wrapT = THREE.RepeatWrapping;
     norm.magFilter = THREE.NearestFilter;
-    norm.repeat.set(repeats / 32, repeats / 32);
+    norm.repeat.set(planeSize / 32, planeSize / 32);
 
     const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize, 500, 500);
     const planeMat = new THREE.MeshPhongMaterial({
@@ -224,11 +216,11 @@ function main() {
   {
     // Pirate Ship by Braden Brunk [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/7aHmBgTur3V)
     const mtlLoader = new MTLLoader();
-    mtlLoader.load("assets/pirateship/materials.mtl.bak", (mtl) => {
+    mtlLoader.load("../assets/Will/pirateship/materials.mtl.bak", (mtl) => {
       mtl.preload();
       const objLoader = new OBJLoader();
       objLoader.setMaterials(mtl);
-      objLoader.load("assets/pirateship/model.obj", (root) => {
+      objLoader.load("../assets/Will/pirateship/model.obj", (root) => {
         root.scale.set(4, 4, 4);
         root.position.set(0, 1, 0);
         root.rotation.y = (90 * Math.PI) / 180;
