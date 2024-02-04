@@ -21,7 +21,7 @@ function main() {
   const fov = 75;
   const aspect = canvas.clientWidth / canvas.clientHeight;
   const near = 0.1;
-  const far = 500;
+  const far = 200;
 
   const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
   const cameraHelper = new THREE.CameraHelper(camera);
@@ -48,7 +48,7 @@ function main() {
   {
     const color = 0xd9c896;
     const near = 5;
-    const far = 450;
+    const far = 200;
     scene.fog = new THREE.Fog(color, near, far);
   }
 
