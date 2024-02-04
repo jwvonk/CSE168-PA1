@@ -10,7 +10,7 @@ function main() {
   renderer.xr.enabled = true;
   document.body.appendChild(VRButton.createButton(renderer));
 
-  renderer.shadowMap.enabled = false;
+  renderer.shadowMap.enabled = false; // too laggy
   renderer.shadowMap.type = THREE.BasicShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
@@ -28,7 +28,7 @@ function main() {
   helpers.push(cameraHelper);
 
   const cameraParent = new THREE.Object3D();
-  cameraParent.position.set(-7.5, .7, 7.5);
+  cameraParent.position.set(-7.5, 30.7, 7.5);
   cameraParent.add(camera);
   base.add(cameraParent);
 
@@ -67,7 +67,7 @@ function main() {
     norm.magFilter = THREE.NearestFilter;
     norm.repeat.set(planeSize / 320, planeSize / 320);
 
-    const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize, 4000, 4000);
+    const planeGeo = new THREE.PlaneGeometry(planeSize, planeSize, 500, 500);
     const planeMat = new THREE.MeshPhongMaterial({
       color: 0xd9c896,
       displacementMap: disp,
@@ -93,7 +93,7 @@ function main() {
     const color = 0xffffff;
     const intensity = 0.9;
     const light = new THREE.DirectionalLight(color, intensity);
-    light.castShadow = true;
+    light.castShadow = false; // too laggy
     light.position.set(500, 150, -500);
     light.target.position.set(0, 0, 0);
     light.shadow.camera.zoom = 1;
@@ -181,7 +181,7 @@ function main() {
     light.position.set(90, 0, 80);
     light.penumbra = 0.1;
     light.angle = (10 * Math.PI) / 180;
-    light.castShadow = true;
+    light.castShadow = false; // too laggy
     light.shadow.camera.far = 20;
     scene.add(light);
     base.add(light.target);
@@ -201,7 +201,7 @@ function main() {
     light.position.set(-80, 0, -90);
     light.penumbra = 0.1;
     light.angle = (10 * Math.PI) / 180;
-    light.castShadow = true;
+    light.castShadow = false; // too laggy
     light.shadow.camera.far = 20;
     scene.add(light);
     base.add(light.target);
@@ -264,7 +264,7 @@ function main() {
     base.position.y = Math.sin(time) * 0.5 + 10;
 
     // Debug
-    let visible = true;
+    let visible = false;
     helpers.forEach((helper) => {
       if (helper.visible != visible) {
         helper.visible = visible;
