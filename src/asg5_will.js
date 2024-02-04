@@ -28,7 +28,7 @@ function main() {
   helpers.push(cameraHelper);
 
   const cameraParent = new THREE.Object3D();
-  cameraParent.position.set(-7.5, 0.7, 7.5);
+  cameraParent.position.set(-7.5, 0, 7.5);
   cameraParent.add(camera);
   base.add(cameraParent);
 
