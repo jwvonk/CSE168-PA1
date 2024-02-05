@@ -8,6 +8,7 @@ function main() {
   const canvas = document.querySelector("#c");
   const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
   document.body.addEventListener('keydown', keyPressed);
+  document.body.addEventListener('keyup', keyUp);
 
   renderer.xr.enabled = true;
   document.body.appendChild(VRButton.createButton(renderer));
@@ -237,10 +238,11 @@ function main() {
     });
   }
   let currentAngle = 0;
-
+  let isRotate = false;
   function render(time) {
     time *= 0.001; // convert time to seconds
-
+    let speed2 = (time % 40) - 20;
+    
     if (resizeRendererToDisplaySize(renderer)) {
       const canvas = renderer.domElement;
       camera.aspect = canvas.clientWidth / canvas.clientHeight;
@@ -262,9 +264,13 @@ function main() {
       light.position.y = ele;
     });
 
-    base.position.x = (time % 40) - 20;
-    base.position.z = -((time % 40) - 20);
-    base.position.y = Math.sin(time) * 0.5 + 10;
+    if(!isRotate){
+      base.position.x = (speed2*(Math.cos(currentAngle)));
+      base.position.z = -(speed2);
+      // base.position.y = Math.sin(time) * 0.5 + 10;
+      base.position.y = 10;
+    }
+    
 
     // Debug
     let visible = false;
@@ -291,18 +297,24 @@ function main() {
     return needResize;
   }
   function keyPressed(e){
+    isRotate = true;
     switch(e.key){
       case 'ArrowLeft':
-        base.rotateY(MathUtils.degToRad(0.1));
-        currentAngle+=0.1
+        base.rotateY(MathUtils.degToRad(1));
+        currentAngle+=1
+        console.log(currentAngle);
         break;
       case 'ArrowRight':
-        base.rotateY(MathUtils.degToRad(-0.1));
-        currentAngle-=0.1
+        base.rotateY(MathUtils.degToRad(-1));
+        currentAngle-=1
+        console.log(currentAngle);
         break;
       e.preventDefault();
       renderer.setAnimationLoop(render);
     }
+  }
+  function keyUp(e){
+    isRotate = false;
   }
 }
 
