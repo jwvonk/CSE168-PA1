@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { MathUtils } from "three";
 import { VRButton } from "three/addons/webxr/VRButton.js";
 import { MTLLoader } from "three/addons/loaders/MTLLoader.js";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
@@ -6,6 +7,7 @@ import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 function main() {
   const canvas = document.querySelector("#c");
   const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
+  document.body.addEventListener('keydown', keyPressed);
 
   renderer.xr.enabled = true;
   document.body.appendChild(VRButton.createButton(renderer));
@@ -234,6 +236,7 @@ function main() {
       });
     });
   }
+  let currentAngle = 0;
 
   function render(time) {
     time *= 0.001; // convert time to seconds
@@ -287,6 +290,22 @@ function main() {
     }
     return needResize;
   }
+  function keyPressed(e){
+    switch(e.key){
+      case 'ArrowLeft':
+        base.rotateY(MathUtils.degToRad(0.1));
+        currentAngle+=0.1
+        break;
+      case 'ArrowRight':
+        base.rotateY(MathUtils.degToRad(-0.1));
+        currentAngle-=0.1
+        break;
+      e.preventDefault();
+      renderer.setAnimationLoop(render);
+    }
+  }
 }
+
+
 
 main();
