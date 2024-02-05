@@ -18,6 +18,8 @@ function main() {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
   const base = new THREE.Object3D();
+  base.position.set(0, 0, 0);
+  base.rotation.set(0, 0, 0);
 
   const helpers = [];
 
@@ -237,7 +239,17 @@ function main() {
       });
     });
   }
-  let currentAngle = 0;
+  function moveObjectForward(object, distance){
+    const rotation = object.rotation.clone();
+    const direction = new THREE.Vector3(0, 0, -1);
+    direction.applyEuler(rotation);
+    const sideways = new THREE.Vector3(1, 0, 0);
+    sideways.applyEuler(rotation);
+    const diagonalDirection = direction.add(sideways).normalize();
+    diagonalDirection.multiplyScalar(distance);
+    object.position.add(direction);
+  }
+
   let isRotate = false;
   function render(time) {
     time *= 0.001; // convert time to seconds
@@ -265,8 +277,7 @@ function main() {
     });
 
     if(!isRotate){
-      base.position.x = (speed2*(Math.cos(currentAngle)));
-      base.position.z = -(speed2);
+      moveObjectForward(base, 0.1);
       base.position.y = Math.sin(time) * 0.5 + 10;
     }
     
