@@ -267,8 +267,7 @@ function main() {
     if(!isRotate){
       base.position.x = (speed2*(Math.cos(currentAngle)));
       base.position.z = -(speed2);
-      // base.position.y = Math.sin(time) * 0.5 + 10;
-      base.position.y = 10;
+      base.position.y = Math.sin(time) * 0.5 + 10;
     }
     
 
