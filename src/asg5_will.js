@@ -3,6 +3,9 @@ import { MathUtils } from "three";
 import { VRButton } from "three/addons/webxr/VRButton.js";
 import { MTLLoader } from "three/addons/loaders/MTLLoader.js";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
+import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
+import { XRHandModelFactory } from 'three/addons/webxr/XRHandModelFactory.js';
+
 
 function main() {
   const canvas = document.querySelector("#c");
@@ -58,6 +61,65 @@ function main() {
   }
 
   {
+    let hand1, hand2;
+    let controller1, controller2;
+    let controllerGrip1, controllerGrip2;
+    let controls;
+
+    let grabbing = false;
+    controller1 = renderer.xr.getController( 0 );
+
+    scene.add( controller1 );
+
+    controller2 = renderer.xr.getController( 1 );
+    scene.add( controller2 );
+
+    const controllerModelFactory = new XRControllerModelFactory();
+    //const handModelFactory = new XRHandModelFactory();
+
+    // Hand 1
+    controllerGrip1 = renderer.xr.getControllerGrip( 0 );
+    controllerGrip1.add( controllerModelFactory.createControllerModel( controllerGrip1 ) );
+    scene.add( controllerGrip1 );
+
+    /*hand1 = renderer.xr.getHand( 0 );
+    hand1.addEventListener( 'pinchstart', onPinchStartLeft );
+    hand1.addEventListener( 'pinchend', () => {
+
+      scaling.active = false;
+
+    } );
+    hand1.add( handModelFactory.createHandModel( hand1 ) );*/
+
+    //scene.add( hand1 );
+
+    // Hand 2
+    controllerGrip2 = renderer.xr.getControllerGrip( 1 );
+    controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
+    scene.add( controllerGrip2 );
+
+    /*hand2 = renderer.xr.getHand( 1 );
+    hand2.addEventListener( 'pinchstart', onPinchStartRight );
+    hand2.addEventListener( 'pinchend', onPinchEndRight );
+    hand2.add( handModelFactory.createHandModel( hand2 ) );
+    scene.add( hand2 );*/
+
+    
+    const geometry = new THREE.BufferGeometry().setFromPoints( [ new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, - 1 ) ] );
+
+    const line = new THREE.Line( geometry );
+    line.name = 'line';
+    line.scale.z = 5;
+
+    controller1.add( line.clone() );
+    controller2.add( line.clone() );
+    cameraParent.add(controller1)
+    cameraParent.add(controller2)
+    cameraParent.add(controllerGrip1)
+    cameraParent.add(controllerGrip2)
+  }
+
+  {
     const planeSize = 1000;
     const loader = new THREE.TextureLoader();
     const disp = loader.load("../assets/Will/aerial_beach_01_disp_2k.jpg");
@@ -86,6 +148,7 @@ function main() {
     mesh.rotation.x = Math.PI * -0.5;
     scene.add(mesh);
   }
+ 
 
   {
     const ambientColor = 0xd9c896;
@@ -250,8 +313,10 @@ function main() {
     object.position.add(direction);
   }
 
+
   let isRotate = false;
   function render(time) {
+    
     time *= 0.001; // convert time to seconds
     let speed2 = (time % 40) - 20;
     
@@ -276,10 +341,10 @@ function main() {
       light.position.y = ele;
     });
 
-    if(!isRotate){
+    /*if(!isRotate){
       moveObjectForward(base, 0.1);
       base.position.y = Math.sin(time) * 0.5 + 10;
-    }
+    }*/
     
 
     // Debug
@@ -290,7 +355,11 @@ function main() {
         helper.update();
       }
     });
-
+    /*const indexTip1Pos = hand1.joints[ 'index-finger-tip' ].position;
+    const indexTip2Pos = hand2.joints[ 'index-finger-tip' ].position;
+    const distance = indexTip1Pos.distanceTo( indexTip2Pos );
+    const newScale = scaling.initialScale + distance / scaling.initialDistance - 1;
+    scaling.object.scale.setScalar( newScale );*/
     renderer.render(scene, camera);
   }
   renderer.setAnimationLoop(render);
