@@ -341,10 +341,10 @@ function main() {
       light.position.y = ele;
     });
 
-    /*if(!isRotate){
+    if(!isRotate){
       moveObjectForward(base, 0.1);
       base.position.y = Math.sin(time) * 0.5 + 10;
-    }*/
+    }
     
 
     // Debug
