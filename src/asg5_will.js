@@ -7,8 +7,7 @@ import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 function main() {
   const canvas = document.querySelector("#c");
   const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
-  document.body.addEventListener('keydown', keyPressed);
-  document.body.addEventListener('keyup', keyUp);
+  document.body.addEventListener("keydown", keyPressed);
 
   renderer.xr.enabled = true;
   document.body.appendChild(VRButton.createButton(renderer));
@@ -18,9 +17,7 @@ function main() {
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
   const base = new THREE.Object3D();
-  base.position.set(0, 0, 0);
-  base.rotation.set(0, 0, 0);
-
+  base.position.set(200, 0, 200);
   const helpers = [];
 
   const fov = 75;
@@ -33,7 +30,7 @@ function main() {
   helpers.push(cameraHelper);
 
   const cameraParent = new THREE.Object3D();
-  cameraParent.position.set(-7.5, 0, 7.5);
+  cameraParent.position.set(-7.5, 50, 7.5);
   cameraParent.add(camera);
   base.add(cameraParent);
 
@@ -220,7 +217,10 @@ function main() {
   }
 
   let ship;
+  let boundingBox = new THREE.Box3();
+
   {
+    const scale = 40;
     // Pirate Ship by Braden Brunk [CC-BY] (https://creativecommons.org/licenses/by/3.0/) via Poly Pizza (https://poly.pizza/m/7aHmBgTur3V)
     const mtlLoader = new MTLLoader();
     mtlLoader.load("../assets/Will/pirateship/materials.mtl.bak", (mtl) => {
@@ -228,33 +228,65 @@ function main() {
       const objLoader = new OBJLoader();
       objLoader.setMaterials(mtl);
       objLoader.load("../assets/Will/pirateship/model.obj", (root) => {
-        root.scale.set(40, 40, 40);
+        root.scale.set(scale, scale, scale);
         root.rotation.y = (90 * Math.PI) / 180;
         base.add(root);
         root.traverse((child) => {
-          child.castShadow = true;
-          child.receiveShadow = true;
+          if (child instanceof THREE.Mesh) {
+            ship = child;
+            child.castShadow = true;
+            child.receiveShadow = true;
+            child.geometry.computeBoundingBox();
+          }
         });
-        ship = root;
       });
     });
   }
-  function moveObjectForward(object, distance){
-    const rotation = object.rotation.clone();
-    const direction = new THREE.Vector3(0, 0, -1);
-    direction.applyEuler(rotation);
-    const sideways = new THREE.Vector3(1, 0, 0);
-    sideways.applyEuler(rotation);
-    const diagonalDirection = direction.add(sideways).normalize();
-    diagonalDirection.multiplyScalar(distance);
-    object.position.add(direction);
+
+  let border = [];
+  {
+    const wallBox = new THREE.Box3(new THREE.Vector3(-0.5, 0, -375), new THREE.Vector3(0.5, 10, 375));
+    const rightBox = wallBox.clone();
+    rightBox.translate(new THREE.Vector3(375, 0, 0));
+    rightBox.applyMatrix4(ship.matrixWorld);
+    border.push(rightBox);
+    const leftBox = wallBox.clone();
+    leftBox.translate(new THREE.Vector3(-375, 0, 0));
+    border.push(leftBox);
+    wallBox.set(new THREE.Vector3(-375, 0, -0.5), new THREE.Vector3(375, 10, 0.5))
+    const forwardBox = wallBox.clone();
+    forwardBox.translate(new THREE.Vector3(0, 0, 375));
+    border.push(forwardBox);
+    const backBox = wallBox.clone();
+    backBox.translate(new THREE.Vector3(0, 0, -375));
+    border.push(backBox);
   }
 
-  let isRotate = false;
+  function checkCollision(mesh, obstacles) {
+    boundingBox.copy(mesh.geometry.boundingBox).applyMatrix4(mesh.matrixWorld);
+    for (let obstacle of obstacles) {
+      if (boundingBox.intersectsBox(obstacle)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function moveObjectForward(object, distance) {
+    const direction = new THREE.Vector3(0, 0, -1);
+    direction.applyEuler(object.rotation);
+    direction.multiplyScalar(distance);
+    object.position.add(direction);
+    if (checkCollision(ship, border)) {
+      object.position.add(direction.negate());
+    }
+    
+  }
+
+
   function render(time) {
     time *= 0.001; // convert time to seconds
-    let speed2 = (time % 40) - 20;
-    
+
     if (resizeRendererToDisplaySize(renderer)) {
       const canvas = renderer.domElement;
       camera.aspect = canvas.clientWidth / canvas.clientHeight;
@@ -276,19 +308,20 @@ function main() {
       light.position.y = ele;
     });
 
-    if(!isRotate){
-      moveObjectForward(base, 0.1);
+    if (ship instanceof THREE.Mesh) {
+      moveObjectForward(base, 1);
       base.position.y = Math.sin(time) * 0.5 + 10;
+      boundingBox.copy(ship.geometry.boundingBox).applyMatrix4(ship.matrixWorld);
     }
-    
 
     // Debug
-    let visible = false;
+    let visible = true;
     helpers.forEach((helper) => {
-      if (helper.visible != visible) {
-        helper.visible = visible;
-        helper.update();
-      }
+        helper.applyMatrix4(helper.matrixWorld);
+        if (helper.visible != visible) {
+          helper.visible = visible;
+          helper.update();
+        }
     });
 
     renderer.render(scene, camera);
@@ -306,28 +339,18 @@ function main() {
     }
     return needResize;
   }
-  function keyPressed(e){
-    isRotate = true;
-    switch(e.key){
-      case 'ArrowLeft':
+  function keyPressed(e) {
+    switch (e.key) {
+      case "ArrowLeft":
         base.rotateY(MathUtils.degToRad(1));
-        currentAngle+=1
-        console.log(currentAngle);
         break;
-      case 'ArrowRight':
+      case "ArrowRight":
         base.rotateY(MathUtils.degToRad(-1));
-        currentAngle-=1
-        console.log(currentAngle);
         break;
-      e.preventDefault();
-      renderer.setAnimationLoop(render);
+      default:
+        break;
     }
   }
-  function keyUp(e){
-    isRotate = false;
-  }
 }
-
-
 
 main();
