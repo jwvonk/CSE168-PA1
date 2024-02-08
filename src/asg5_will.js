@@ -311,7 +311,6 @@ function main() {
     const wallBox = new THREE.Box3(new THREE.Vector3(-0.5, 0, -375), new THREE.Vector3(0.5, 10, 375));
     const rightBox = wallBox.clone();
     rightBox.translate(new THREE.Vector3(375, 0, 0));
-    rightBox.applyMatrix4(ship.matrixWorld);
     border.push(rightBox);
     const leftBox = wallBox.clone();
     leftBox.translate(new THREE.Vector3(-375, 0, 0));
