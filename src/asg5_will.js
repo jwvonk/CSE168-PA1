@@ -419,7 +419,7 @@ function main() {
     });
 
     if (ship instanceof THREE.Mesh) {
-      moveObjectForward(base, 1);
+      moveObjectForward(base, .1);
       base.position.y = Math.sin(time) * 0.5 + 10;
       boundingBox
         .copy(ship.geometry.boundingBox)
