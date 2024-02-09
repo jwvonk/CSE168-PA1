@@ -180,6 +180,12 @@ function main() {
     steeringWheel.rotation.set(100,150,0) 
     steeringWheel.position.set(-6.78, 0.2, 6.4);
     group.add(steeringWheel)
+    const refGeo = new THREE.BoxGeometry(0.2,0.2,0.2);
+    const refMat = new THREE.MeshBasicMaterial( {color: 0x00ff00} ); 
+    const wheelRef = new THREE.Mesh(refGeo, refMat)
+    //scene.add(wheelRef)
+    steeringWheel.add(wheelRef)
+    wheelRef.position.set(0,0,0)
   }
 
   {
@@ -573,8 +579,6 @@ function onSelectEnd( event ) {
     controller.userData.selected = undefined;
 
   }
-
-
 
 }
 
