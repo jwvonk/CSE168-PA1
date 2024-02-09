@@ -7,7 +7,6 @@ import { XRControllerModelFactory } from "three/addons/webxr/XRControllerModelFa
 import { XRHandModelFactory } from "three/addons/webxr/XRHandModelFactory.js";
 
 let raycaster = new THREE.Raycaster();
-let group = new THREE.Group();
 let controller1, controller2;
 let intersectionPoint;
 let steeringWheel;
@@ -41,12 +40,11 @@ function main() {
 
   const cameraParent = new THREE.Object3D();
   cameraParent.position.set(-7.5, 0, 7.5);
+  cameraParent.rotation.set(0, -45, 0);
   cameraParent.add(camera);
   base.add(cameraParent);
 
   const scene = new THREE.Scene();
-
-  scene.add(group);
   {
     const loader = new THREE.TextureLoader();
     const texture = loader.load("../assets/Will/goegap_2k.jpg", () => {
@@ -54,7 +52,7 @@ function main() {
       rt.fromEquirectangularTexture(renderer, texture);
       scene.background = rt.texture;
     });
-    scene.rotation.y = (-45 * Math.PI) / 180;
+    // scene.rotation.y = (-45 * Math.PI) / 180;
   }
 
   scene.add(base);
@@ -169,28 +167,6 @@ function main() {
     const intensity = 0.2;
     const light = new THREE.AmbientLight(ambientColor, intensity);
     scene.add(light);
-  }
-
-  {
-    const WheelGeometry = new THREE.TorusGeometry(0.5, 0.1, 16, 100);
-    const WheelMaterial = new THREE.MeshStandardMaterial({
-      color: 0xffffff,
-      roughness: 0.7,
-      metalness: 0.0,
-    });
-    steeringWheel = new THREE.Mesh(WheelGeometry, WheelMaterial);
-
-    scene.add(steeringWheel);
-    base.add(group);
-    steeringWheel.rotation.set(100, 150, 0);
-    steeringWheel.position.set(-6.78, 0.2, 6.4);
-    group.add(steeringWheel);
-    const refGeo = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-    const refMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    const wheelRef = new THREE.Mesh(refGeo, refMat);
-    //scene.add(wheelRef)
-    steeringWheel.add(wheelRef);
-    wheelRef.position.set(0, 0, 0);
   }
 
   {
@@ -345,6 +321,38 @@ function main() {
     });
   }
 
+  const steeringWheel = new THREE.Object3D();
+  {
+    base.add(steeringWheel);
+    const numSpokes = 6;
+    const spokeLength = 2.3;
+    const angleStep = (Math.PI * 2) / numSpokes;
+    const spokeGeometry = new THREE.CylinderGeometry(
+      0.1,
+      0.1,
+      spokeLength,
+      4
+    );
+    const wheelMaterial = new THREE.MeshPhongMaterial({ color: 0xd6a755, flatShading: true });
+    for (var i = 0; i < numSpokes / 2; i++) {
+      const spoke = new THREE.Mesh(spokeGeometry, wheelMaterial);
+      const angle = i * angleStep;
+      spoke.rotation.z = angle;
+      steeringWheel.add(spoke);
+      // const refGeo = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+      // const refMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+      // const wheelRef = new THREE.Mesh(refGeo, refMat);
+      // steeringWheel.add(wheelRef);
+      // wheelRef.position.set(0, 0, 0);
+    }
+    const wheelGeometry = new THREE.TorusGeometry(0.6, 0.245, 4, 12);
+    const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
+    steeringWheel.add(wheel)
+
+    steeringWheel.rotation.set(2.8, .7, 0);
+    steeringWheel.position.set(-6.85, 0.1, 6.2);
+  }
+
   let border = [];
   {
     const wallBox = new THREE.Box3(
@@ -419,7 +427,7 @@ function main() {
     });
 
     if (ship instanceof THREE.Mesh) {
-      moveObjectForward(base, .1);
+      // moveObjectForward(base, 0.1);
       base.position.y = Math.sin(time) * 0.5 + 10;
       boundingBox
         .copy(ship.geometry.boundingBox)
@@ -469,111 +477,112 @@ function main() {
         break;
     }
   }
-}
-
-function intersectObjects(controller) {
-  // Do not highlight in mobile-ar
-
-  if (controller.userData.targetRayMode === "screen") return;
-
-  // Do not highlight when already selected
-
-  //if ( controller.userData.selected !== undefined ) return;
-
-  const line = controller.getObjectByName("line");
-  const intersections = getIntersections(controller);
-
-  if (intersections.length > 0) {
-    const intersection = intersections[0];
-    //if we have selected the wheel, rotate it
-    if (controller.userData.selected != null) {
-      RotateWheel(intersection.point);
+  function intersectObjects(controller) {
+    // Do not highlight in mobile-ar
+  
+    if (controller.userData.targetRayMode === "screen") return;
+  
+    // Do not highlight when already selected
+  
+    //if ( controller.userData.selected !== undefined ) return;
+  
+    const line = controller.getObjectByName("line");
+    const intersections = getIntersections(controller);
+  
+    if (intersections.length > 0) {
+      const intersection = intersections[0];
+      //if we have selected the wheel, rotate it
+      if (controller.userData.selected != null) {
+        RotateWheel(intersection.point);
+      } else {
+        const object = intersection.object;
+        object.material.emissive.r = 1;
+        intersected.push(object);
+  
+        line.scale.z = intersection.distance;
+      }
     } else {
-      const object = intersection.object;
-      object.material.emissive.r = 1;
-      intersected.push(object);
-
-      line.scale.z = intersection.distance;
+      line.scale.z = 5;
     }
-  } else {
-    line.scale.z = 5;
+  }
+  
+  function RotateWheel(newPoint) {
+    let totalAngle = FindWheelAngle(newPoint);
+    console.log(totalAngle);
+    let angleDifference = currentAngle - totalAngle;
+    console.log(angleDifference);
+    steeringWheel.rotateZ(angleDifference);
+    currentAngle = totalAngle;
+    base.rotateY(MathUtils.degToRad(angleDifference * 30));
+  }
+  
+  function FindWheelAngle(newPoint) {
+    let totalAngle = 0;
+  
+    let direction = FindLocalPoint(newPoint);
+    totalAngle += ConvertToAngle(direction);
+  
+    return totalAngle;
+  }
+  
+  function FindLocalPoint(point) {
+    return steeringWheel.worldToLocal(point);
+  }
+  
+  function ConvertToAngle(dir) {
+    // Use a consistent up direction to find the angle
+    return steeringWheel.up.angleTo(dir);
+  }
+  
+  function getIntersections(controller) {
+    controller.updateMatrixWorld();
+    let tempMatrix = new THREE.Matrix4();
+    tempMatrix.identity().extractRotation(controller.matrixWorld);
+  
+    raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
+    raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
+  
+    return raycaster.intersectObjects(steeringWheel.children, false);
+  }
+  
+  function cleanIntersected() {
+    while (intersected.length) {
+      const object = intersected.pop();
+      object.material.emissive.r = 0;
+    }
+  }
+  
+  function onSelectStart(event) {
+    const controller = event.target;
+  
+    const intersections = getIntersections(controller);
+  
+    if (intersections.length > 0) {
+      const intersection = intersections[0];
+  
+      const object = intersection.object;
+      intersectionPoint = intersection.point;
+      object.material.emissive.b = 1;
+      //controller.attach( object );
+  
+      controller.userData.selected = object;
+    }
+  
+    controller.userData.targetRayMode = event.data.targetRayMode;
+  }
+  
+  function onSelectEnd(event) {
+    const controller = event.target;
+    intersectionPoint = null;
+    if (controller.userData.selected !== undefined) {
+      const object = controller.userData.selected;
+      object.material.emissive.b = 0;
+      steeringWheel.attach(object);
+      controller.userData.selected = undefined;
+    }
   }
 }
 
-function RotateWheel(newPoint) {
-  let totalAngle = FindWheelAngle(newPoint);
-  console.log(totalAngle);
-  let angleDifference = currentAngle - totalAngle;
-  console.log(angleDifference);
-  steeringWheel.rotateZ(angleDifference);
-  currentAngle = totalAngle;
-  base.rotateY(MathUtils.degToRad(angleDifference * 30));
-}
 
-function FindWheelAngle(newPoint) {
-  let totalAngle = 0;
-
-  let direction = FindLocalPoint(newPoint);
-  totalAngle += ConvertToAngle(direction);
-
-  return totalAngle;
-}
-
-function FindLocalPoint(point) {
-  return steeringWheel.worldToLocal(point);
-}
-
-function ConvertToAngle(dir) {
-  // Use a consistent up direction to find the angle
-  return steeringWheel.up.angleTo(dir);
-}
-
-function getIntersections(controller) {
-  controller.updateMatrixWorld();
-  let tempMatrix = new THREE.Matrix4();
-  tempMatrix.identity().extractRotation(controller.matrixWorld);
-
-  raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
-  raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
-
-  return raycaster.intersectObjects(group.children, false);
-}
-
-function cleanIntersected() {
-  while (intersected.length) {
-    const object = intersected.pop();
-    object.material.emissive.r = 0;
-  }
-}
-
-function onSelectStart(event) {
-  const controller = event.target;
-
-  const intersections = getIntersections(controller);
-
-  if (intersections.length > 0) {
-    const intersection = intersections[0];
-
-    const object = intersection.object;
-    intersectionPoint = intersection.point;
-    object.material.emissive.b = 1;
-    //controller.attach( object );
-
-    controller.userData.selected = object;
-  }
-
-  controller.userData.targetRayMode = event.data.targetRayMode;
-}
-
-function onSelectEnd(event) {
-  const controller = event.target;
-  intersectionPoint = null;
-  if (controller.userData.selected !== undefined) {
-    const object = controller.userData.selected;
-    object.material.emissive.b = 0;
-    group.attach(object);
-    controller.userData.selected = undefined;
-  }
-}
 
 main();
