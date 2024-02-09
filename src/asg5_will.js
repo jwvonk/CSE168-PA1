@@ -3,15 +3,15 @@ import { MathUtils } from "three";
 import { VRButton } from "three/addons/webxr/VRButton.js";
 import { MTLLoader } from "three/addons/loaders/MTLLoader.js";
 import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
-import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
-import { XRHandModelFactory } from 'three/addons/webxr/XRHandModelFactory.js';
+import { XRControllerModelFactory } from "three/addons/webxr/XRControllerModelFactory.js";
+import { XRHandModelFactory } from "three/addons/webxr/XRHandModelFactory.js";
 
 let raycaster = new THREE.Raycaster();
 let group = new THREE.Group();
-let controller1, controller2
-let intersectionPoint
-let steeringWheel
-let currentAngle = 0.0
+let controller1, controller2;
+let intersectionPoint;
+let steeringWheel;
+let currentAngle = 0.0;
 let base;
 const intersected = [];
 function main() {
@@ -46,7 +46,7 @@ function main() {
 
   const scene = new THREE.Scene();
 
-	scene.add( group );
+  scene.add(group);
   {
     const loader = new THREE.TextureLoader();
     const texture = loader.load("../assets/Will/goegap_2k.jpg", () => {
@@ -73,23 +73,25 @@ function main() {
     let controls;
 
     let grabbing = false;
-    controller1 = renderer.xr.getController( 0 );
-    controller1.addEventListener( 'selectstart', onSelectStart );
-    controller1.addEventListener( 'selectend', onSelectEnd );
-    scene.add( controller1 );
+    controller1 = renderer.xr.getController(0);
+    controller1.addEventListener("selectstart", onSelectStart);
+    controller1.addEventListener("selectend", onSelectEnd);
+    scene.add(controller1);
 
-    controller2 = renderer.xr.getController( 1 );
-    controller2.addEventListener( 'selectstart', onSelectStart );
-    controller2.addEventListener( 'selectend', onSelectEnd );
-    scene.add( controller2 );
+    controller2 = renderer.xr.getController(1);
+    controller2.addEventListener("selectstart", onSelectStart);
+    controller2.addEventListener("selectend", onSelectEnd);
+    scene.add(controller2);
 
     const controllerModelFactory = new XRControllerModelFactory();
     //const handModelFactory = new XRHandModelFactory();
 
     // Hand 1
-    controllerGrip1 = renderer.xr.getControllerGrip( 0 );
-    controllerGrip1.add( controllerModelFactory.createControllerModel( controllerGrip1 ) );
-    scene.add( controllerGrip1 );
+    controllerGrip1 = renderer.xr.getControllerGrip(0);
+    controllerGrip1.add(
+      controllerModelFactory.createControllerModel(controllerGrip1)
+    );
+    scene.add(controllerGrip1);
 
     /*hand1 = renderer.xr.getHand( 0 );
     hand1.addEventListener( 'pinchstart', onPinchStartLeft );
@@ -103,9 +105,11 @@ function main() {
     //scene.add( hand1 );
 
     // Hand 2
-    controllerGrip2 = renderer.xr.getControllerGrip( 1 );
-    controllerGrip2.add( controllerModelFactory.createControllerModel( controllerGrip2 ) );
-    scene.add( controllerGrip2 );
+    controllerGrip2 = renderer.xr.getControllerGrip(1);
+    controllerGrip2.add(
+      controllerModelFactory.createControllerModel(controllerGrip2)
+    );
+    scene.add(controllerGrip2);
 
     /*hand2 = renderer.xr.getHand( 1 );
     hand2.addEventListener( 'pinchstart', onPinchStartRight );
@@ -113,19 +117,21 @@ function main() {
     hand2.add( handModelFactory.createHandModel( hand2 ) );
     scene.add( hand2 );*/
 
-    
-    const geometry = new THREE.BufferGeometry().setFromPoints( [ new THREE.Vector3( 0, 0, 0 ), new THREE.Vector3( 0, 0, - 1 ) ] );
+    const geometry = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(0, 0, -1),
+    ]);
 
-    const line = new THREE.Line( geometry );
-    line.name = 'line';
+    const line = new THREE.Line(geometry);
+    line.name = "line";
     line.scale.z = 5;
 
-    controller1.add( line.clone() );
-    controller2.add( line.clone() );
-    cameraParent.add(controller1)
-    cameraParent.add(controller2)
-    cameraParent.add(controllerGrip1)
-    cameraParent.add(controllerGrip2)
+    controller1.add(line.clone());
+    controller2.add(line.clone());
+    cameraParent.add(controller1);
+    cameraParent.add(controller2);
+    cameraParent.add(controllerGrip1);
+    cameraParent.add(controllerGrip2);
   }
 
   {
@@ -157,7 +163,6 @@ function main() {
     mesh.rotation.x = Math.PI * -0.5;
     scene.add(mesh);
   }
- 
 
   {
     const ambientColor = 0xd9c896;
@@ -167,25 +172,25 @@ function main() {
   }
 
   {
-    const WheelGeometry = new THREE.TorusGeometry( 0.5, 0.1, 16, 100 );
-    const WheelMaterial = new THREE.MeshStandardMaterial( {
-      color:  0xffffff,
+    const WheelGeometry = new THREE.TorusGeometry(0.5, 0.1, 16, 100);
+    const WheelMaterial = new THREE.MeshStandardMaterial({
+      color: 0xffffff,
       roughness: 0.7,
-      metalness: 0.0
-    } );
-    steeringWheel = new THREE.Mesh( WheelGeometry, WheelMaterial );
+      metalness: 0.0,
+    });
+    steeringWheel = new THREE.Mesh(WheelGeometry, WheelMaterial);
 
     scene.add(steeringWheel);
-    base.add(group)
-    steeringWheel.rotation.set(100,150,0) 
+    base.add(group);
+    steeringWheel.rotation.set(100, 150, 0);
     steeringWheel.position.set(-6.78, 0.2, 6.4);
-    group.add(steeringWheel)
-    const refGeo = new THREE.BoxGeometry(0.2,0.2,0.2);
-    const refMat = new THREE.MeshBasicMaterial( {color: 0x00ff00} ); 
-    const wheelRef = new THREE.Mesh(refGeo, refMat)
+    group.add(steeringWheel);
+    const refGeo = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+    const refMat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    const wheelRef = new THREE.Mesh(refGeo, refMat);
     //scene.add(wheelRef)
-    steeringWheel.add(wheelRef)
-    wheelRef.position.set(0,0,0)
+    steeringWheel.add(wheelRef);
+    wheelRef.position.set(0, 0, 0);
   }
 
   {
@@ -342,14 +347,20 @@ function main() {
 
   let border = [];
   {
-    const wallBox = new THREE.Box3(new THREE.Vector3(-0.5, 0, -375), new THREE.Vector3(0.5, 10, 375));
+    const wallBox = new THREE.Box3(
+      new THREE.Vector3(-0.5, 0, -375),
+      new THREE.Vector3(0.5, 10, 375)
+    );
     const rightBox = wallBox.clone();
     rightBox.translate(new THREE.Vector3(375, 0, 0));
     border.push(rightBox);
     const leftBox = wallBox.clone();
     leftBox.translate(new THREE.Vector3(-375, 0, 0));
     border.push(leftBox);
-    wallBox.set(new THREE.Vector3(-375, 0, -0.5), new THREE.Vector3(375, 10, 0.5))
+    wallBox.set(
+      new THREE.Vector3(-375, 0, -0.5),
+      new THREE.Vector3(375, 10, 0.5)
+    );
     const forwardBox = wallBox.clone();
     forwardBox.translate(new THREE.Vector3(0, 0, 375));
     border.push(forwardBox);
@@ -369,17 +380,18 @@ function main() {
   }
 
   function moveObjectForward(object, distance) {
+    const rotation = object.rotation.clone();
     const direction = new THREE.Vector3(0, 0, -1);
-    direction.applyEuler(object.rotation);
-    direction.multiplyScalar(distance);
+    direction.applyEuler(rotation);
+    const sideways = new THREE.Vector3(1, 0, 0);
+    sideways.applyEuler(rotation);
+    const diagonalDirection = direction.add(sideways).normalize();
+    diagonalDirection.multiplyScalar(distance);
     object.position.add(direction);
     if (checkCollision(ship, border)) {
       object.position.add(direction.negate());
     }
-    
   }
-
-
 
   function render(time) {
     cleanIntersected();
@@ -409,25 +421,27 @@ function main() {
     if (ship instanceof THREE.Mesh) {
       moveObjectForward(base, 1);
       base.position.y = Math.sin(time) * 0.5 + 10;
-      boundingBox.copy(ship.geometry.boundingBox).applyMatrix4(ship.matrixWorld);
+      boundingBox
+        .copy(ship.geometry.boundingBox)
+        .applyMatrix4(ship.matrixWorld);
     }
 
     // Debug
     let visible = true;
     helpers.forEach((helper) => {
-        helper.applyMatrix4(helper.matrixWorld);
-        if (helper.visible != visible) {
-          helper.visible = visible;
-          helper.update();
-        }
+      helper.applyMatrix4(helper.matrixWorld);
+      if (helper.visible != visible) {
+        helper.visible = visible;
+        helper.update();
+      }
     });
     /*const indexTip1Pos = hand1.joints[ 'index-finger-tip' ].position;
     const indexTip2Pos = hand2.joints[ 'index-finger-tip' ].position;
     const distance = indexTip1Pos.distanceTo( indexTip2Pos );
     const newScale = scaling.initialScale + distance / scaling.initialDistance - 1;
     scaling.object.scale.setScalar( newScale );*/
-    intersectObjects( controller1 );
-		intersectObjects( controller2 );
+    intersectObjects(controller1);
+    intersectObjects(controller2);
     renderer.render(scene, camera);
   }
   renderer.setAnimationLoop(render);
@@ -457,35 +471,30 @@ function main() {
   }
 }
 
-function intersectObjects( controller ) {
-
+function intersectObjects(controller) {
   // Do not highlight in mobile-ar
 
-  if ( controller.userData.targetRayMode === 'screen' ) return;
+  if (controller.userData.targetRayMode === "screen") return;
 
   // Do not highlight when already selected
 
   //if ( controller.userData.selected !== undefined ) return;
 
-  const line = controller.getObjectByName( 'line' );
-  const intersections = getIntersections( controller );
+  const line = controller.getObjectByName("line");
+  const intersections = getIntersections(controller);
 
-  if ( intersections.length > 0 ) {
-
-    const intersection = intersections[ 0 ];
+  if (intersections.length > 0) {
+    const intersection = intersections[0];
     //if we have selected the wheel, rotate it
     if (controller.userData.selected != null) {
-      RotateWheel(intersection.point)
-    }
-    else {
+      RotateWheel(intersection.point);
+    } else {
       const object = intersection.object;
       object.material.emissive.r = 1;
-      intersected.push( object );
-  
+      intersected.push(object);
+
       line.scale.z = intersection.distance;
     }
-
-
   } else {
     line.scale.z = 5;
   }
@@ -493,16 +502,15 @@ function intersectObjects( controller ) {
 
 function RotateWheel(newPoint) {
   let totalAngle = FindWheelAngle(newPoint);
-  console.log(totalAngle)
-  let angleDifference = currentAngle - totalAngle
-  console.log(angleDifference)
-  steeringWheel.rotateZ(angleDifference)
-  currentAngle = totalAngle
+  console.log(totalAngle);
+  let angleDifference = currentAngle - totalAngle;
+  console.log(angleDifference);
+  steeringWheel.rotateZ(angleDifference);
+  currentAngle = totalAngle;
   base.rotateY(MathUtils.degToRad(angleDifference * 30));
 }
 
-function FindWheelAngle(newPoint)
-{
+function FindWheelAngle(newPoint) {
   let totalAngle = 0;
 
   let direction = FindLocalPoint(newPoint);
@@ -511,48 +519,40 @@ function FindWheelAngle(newPoint)
   return totalAngle;
 }
 
-function FindLocalPoint(point)
-{
-    return steeringWheel.worldToLocal( point );
+function FindLocalPoint(point) {
+  return steeringWheel.worldToLocal(point);
 }
 
-function ConvertToAngle(dir)
-{
-    // Use a consistent up direction to find the angle
-    return steeringWheel.up.angleTo(dir);
+function ConvertToAngle(dir) {
+  // Use a consistent up direction to find the angle
+  return steeringWheel.up.angleTo(dir);
 }
 
-function getIntersections( controller ) {
-
+function getIntersections(controller) {
   controller.updateMatrixWorld();
   let tempMatrix = new THREE.Matrix4();
-  tempMatrix.identity().extractRotation( controller.matrixWorld );
+  tempMatrix.identity().extractRotation(controller.matrixWorld);
 
-  raycaster.ray.origin.setFromMatrixPosition( controller.matrixWorld );
-  raycaster.ray.direction.set( 0, 0, - 1 ).applyMatrix4( tempMatrix );
+  raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
+  raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
 
-  return raycaster.intersectObjects( group.children, false );
-
+  return raycaster.intersectObjects(group.children, false);
 }
 
 function cleanIntersected() {
-  while ( intersected.length ) {
+  while (intersected.length) {
     const object = intersected.pop();
     object.material.emissive.r = 0;
-
   }
-
 }
 
-function onSelectStart( event ) {
-
+function onSelectStart(event) {
   const controller = event.target;
 
-  const intersections = getIntersections( controller );
+  const intersections = getIntersections(controller);
 
-  if ( intersections.length > 0 ) {
-
-    const intersection = intersections[ 0 ];
+  if (intersections.length > 0) {
+    const intersection = intersections[0];
 
     const object = intersection.object;
     intersectionPoint = intersection.point;
@@ -560,26 +560,20 @@ function onSelectStart( event ) {
     //controller.attach( object );
 
     controller.userData.selected = object;
-
   }
 
   controller.userData.targetRayMode = event.data.targetRayMode;
-
 }
 
-function onSelectEnd( event ) {
-
+function onSelectEnd(event) {
   const controller = event.target;
   intersectionPoint = null;
-  if ( controller.userData.selected !== undefined ) {
-
+  if (controller.userData.selected !== undefined) {
     const object = controller.userData.selected;
     object.material.emissive.b = 0;
-    group.attach( object );
+    group.attach(object);
     controller.userData.selected = undefined;
-
   }
-
 }
 
 main();
