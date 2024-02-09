@@ -6,7 +6,14 @@ import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 import { XRControllerModelFactory } from 'three/addons/webxr/XRControllerModelFactory.js';
 import { XRHandModelFactory } from 'three/addons/webxr/XRHandModelFactory.js';
 
-
+let raycaster = new THREE.Raycaster();
+let group = new THREE.Group();
+let controller1, controller2
+let intersectionPoint
+let steeringWheel
+let currentAngle = 0.0
+let base;
+const intersected = [];
 function main() {
   const canvas = document.querySelector("#c");
   const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
@@ -19,7 +26,7 @@ function main() {
   renderer.shadowMap.type = THREE.BasicShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-  const base = new THREE.Object3D();
+  base = new THREE.Object3D();
   base.position.set(200, 0, 200);
   const helpers = [];
 
@@ -33,11 +40,13 @@ function main() {
   helpers.push(cameraHelper);
 
   const cameraParent = new THREE.Object3D();
-  cameraParent.position.set(-7.5, 50, 7.5);
+  cameraParent.position.set(-7.5, 0, 7.5);
   cameraParent.add(camera);
   base.add(cameraParent);
 
   const scene = new THREE.Scene();
+
+	scene.add( group );
   {
     const loader = new THREE.TextureLoader();
     const texture = loader.load("../assets/Will/goegap_2k.jpg", () => {
@@ -59,16 +68,19 @@ function main() {
 
   {
     let hand1, hand2;
-    let controller1, controller2;
+
     let controllerGrip1, controllerGrip2;
     let controls;
 
     let grabbing = false;
     controller1 = renderer.xr.getController( 0 );
-
+    controller1.addEventListener( 'selectstart', onSelectStart );
+    controller1.addEventListener( 'selectend', onSelectEnd );
     scene.add( controller1 );
 
     controller2 = renderer.xr.getController( 1 );
+    controller2.addEventListener( 'selectstart', onSelectStart );
+    controller2.addEventListener( 'selectend', onSelectEnd );
     scene.add( controller2 );
 
     const controllerModelFactory = new XRControllerModelFactory();
@@ -152,6 +164,22 @@ function main() {
     const intensity = 0.2;
     const light = new THREE.AmbientLight(ambientColor, intensity);
     scene.add(light);
+  }
+
+  {
+    const WheelGeometry = new THREE.TorusGeometry( 0.5, 0.1, 16, 100 );
+    const WheelMaterial = new THREE.MeshStandardMaterial( {
+      color:  0xffffff,
+      roughness: 0.7,
+      metalness: 0.0
+    } );
+    steeringWheel = new THREE.Mesh( WheelGeometry, WheelMaterial );
+
+    scene.add(steeringWheel);
+    base.add(group)
+    steeringWheel.rotation.set(100,150,0) 
+    steeringWheel.position.set(-6.78, 0.2, 6.4);
+    group.add(steeringWheel)
   }
 
   {
@@ -348,7 +376,7 @@ function main() {
 
 
   function render(time) {
-    
+    cleanIntersected();
     time *= 0.001; // convert time to seconds
 
     if (resizeRendererToDisplaySize(renderer)) {
@@ -392,6 +420,8 @@ function main() {
     const distance = indexTip1Pos.distanceTo( indexTip2Pos );
     const newScale = scaling.initialScale + distance / scaling.initialDistance - 1;
     scaling.object.scale.setScalar( newScale );*/
+    intersectObjects( controller1 );
+		intersectObjects( controller2 );
     renderer.render(scene, camera);
   }
   renderer.setAnimationLoop(render);
@@ -419,6 +449,133 @@ function main() {
         break;
     }
   }
+}
+
+function intersectObjects( controller ) {
+
+  // Do not highlight in mobile-ar
+
+  if ( controller.userData.targetRayMode === 'screen' ) return;
+
+  // Do not highlight when already selected
+
+  //if ( controller.userData.selected !== undefined ) return;
+
+  const line = controller.getObjectByName( 'line' );
+  const intersections = getIntersections( controller );
+
+  if ( intersections.length > 0 ) {
+
+    const intersection = intersections[ 0 ];
+    //if we have selected the wheel, rotate it
+    if (controller.userData.selected != null) {
+      RotateWheel(intersection.point)
+    }
+    else {
+      const object = intersection.object;
+      object.material.emissive.r = 1;
+      intersected.push( object );
+  
+      line.scale.z = intersection.distance;
+    }
+
+
+  } else {
+    line.scale.z = 5;
+  }
+}
+
+function RotateWheel(newPoint) {
+  let totalAngle = FindWheelAngle(newPoint);
+  console.log(totalAngle)
+  let angleDifference = currentAngle - totalAngle
+  console.log(angleDifference)
+  steeringWheel.rotateZ(angleDifference)
+  currentAngle = totalAngle
+  base.rotateY(MathUtils.degToRad(angleDifference * 30));
+}
+
+function FindWheelAngle(newPoint)
+{
+  let totalAngle = 0;
+
+  let direction = FindLocalPoint(newPoint);
+  totalAngle += ConvertToAngle(direction);
+
+  return totalAngle;
+}
+
+function FindLocalPoint(point)
+{
+    return steeringWheel.worldToLocal( point );
+}
+
+function ConvertToAngle(dir)
+{
+    // Use a consistent up direction to find the angle
+    return steeringWheel.up.angleTo(dir);
+}
+
+function getIntersections( controller ) {
+
+  controller.updateMatrixWorld();
+  let tempMatrix = new THREE.Matrix4();
+  tempMatrix.identity().extractRotation( controller.matrixWorld );
+
+  raycaster.ray.origin.setFromMatrixPosition( controller.matrixWorld );
+  raycaster.ray.direction.set( 0, 0, - 1 ).applyMatrix4( tempMatrix );
+
+  return raycaster.intersectObjects( group.children, false );
+
+}
+
+function cleanIntersected() {
+  while ( intersected.length ) {
+    const object = intersected.pop();
+    object.material.emissive.r = 0;
+
+  }
+
+}
+
+function onSelectStart( event ) {
+
+  const controller = event.target;
+
+  const intersections = getIntersections( controller );
+
+  if ( intersections.length > 0 ) {
+
+    const intersection = intersections[ 0 ];
+
+    const object = intersection.object;
+    intersectionPoint = intersection.point;
+    object.material.emissive.b = 1;
+    //controller.attach( object );
+
+    controller.userData.selected = object;
+
+  }
+
+  controller.userData.targetRayMode = event.data.targetRayMode;
+
+}
+
+function onSelectEnd( event ) {
+
+  const controller = event.target;
+  intersectionPoint = null;
+  if ( controller.userData.selected !== undefined ) {
+
+    const object = controller.userData.selected;
+    object.material.emissive.b = 0;
+    group.attach( object );
+    controller.userData.selected = undefined;
+
+  }
+
+
+
 }
 
 main();
