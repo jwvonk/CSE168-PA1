@@ -13,6 +13,7 @@ let steeringWheel;
 let currentAngle = 0.0;
 let base;
 const intersected = [];
+let lastPoint;
 function main() {
   const canvas = document.querySelector("#c");
   const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
@@ -514,6 +515,7 @@ function main() {
     steeringWheel.rotateZ(angleDifference);
     currentAngle = totalAngle;
     base.rotateY(MathUtils.degToRad(angleDifference * 30));
+    lastPoint = newPoint
   }
   
   function FindWheelAngle(newPoint) {
@@ -530,7 +532,9 @@ function main() {
   }
   
   function ConvertToAngle(dir) {
-    // Use a consistent up direction to find the angle
+    if (lastPoint == null) {
+      lastPoint = steeringWheel.up
+    }
     return steeringWheel.up.angleTo(dir);
   }
   
@@ -573,12 +577,13 @@ function main() {
   
   function onSelectEnd(event) {
     const controller = event.target;
-    intersectionPoint = null;
     if (controller.userData.selected !== undefined) {
       const object = controller.userData.selected;
       object.material.emissive.b = 0;
       steeringWheel.attach(object);
       controller.userData.selected = undefined;
+      currentAngle = FindWheelAngle(intersectionPoint)
+      intersectionPoint = null
     }
   }
 }
