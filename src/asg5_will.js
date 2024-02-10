@@ -539,9 +539,14 @@ function main() {
     if (lastPoint == null) {
       lastPoint = steeringWheel.up
     }
-    console.log(curVec)
-    console.log(dir)
-    return curVec.angleTo(dir)
+    let angle = Math.acos(dir.normalize().dot(curVec.normalize()))
+    let cross = dir.cross(curVec)
+    if (cross < 0) {
+      angle = -angle
+    }
+
+    console.log(angle)
+    return angle
   }
   
   function getIntersections(controller) {
