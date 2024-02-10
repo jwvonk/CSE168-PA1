@@ -14,6 +14,7 @@ let currentAngle = 0.0;
 let base;
 const intersected = [];
 let lastPoint;
+let curVec;
 function main() {
   const canvas = document.querySelector("#c");
   const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
@@ -352,6 +353,7 @@ function main() {
 
     steeringWheel.rotation.set(2.8, .7, 0);
     steeringWheel.position.set(-6.85, 0.1, 6.2);
+    curVec = steeringWheel.up
   }
 
   let border = [];
@@ -513,13 +515,11 @@ function main() {
     //console.log(totalAngle);
     let angleDifference = currentAngle - totalAngle;
     currentAngle = totalAngle;
-    if (angleDifference > 1 || angleDifference < -1) {
-      return;
-    }
     steeringWheel.rotateZ(angleDifference);
-    currentAngle = totalAngle;
     base.rotateY(MathUtils.degToRad(angleDifference * 30));
     lastPoint = newPoint
+    curVec = steeringWheel.worldToLocal(lastPoint)
+  
   }
   
   function FindWheelAngle(newPoint) {
@@ -539,7 +539,9 @@ function main() {
     if (lastPoint == null) {
       lastPoint = steeringWheel.up
     }
-    return steeringWheel.up.angleTo(dir)
+    console.log(curVec)
+    console.log(dir)
+    return curVec.angleTo(dir)
   }
   
   function getIntersections(controller) {
