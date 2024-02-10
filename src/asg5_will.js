@@ -428,7 +428,7 @@ function main() {
     });
 
     if (ship instanceof THREE.Mesh) {
-      // moveObjectForward(base, 0.1);
+      moveObjectForward(base, 0.1);
       base.position.y = Math.sin(time) * 0.5 + 10;
       boundingBox
         .copy(ship.geometry.boundingBox)
@@ -494,6 +494,7 @@ function main() {
       const intersection = intersections[0];
       //if we have selected the wheel, rotate it
       if (controller.userData.selected != null) {
+        //console.log(intersection.point)
         RotateWheel(intersection.point);
       } else {
         const object = intersection.object;
@@ -509,9 +510,12 @@ function main() {
   
   function RotateWheel(newPoint) {
     let totalAngle = FindWheelAngle(newPoint);
-    console.log(totalAngle);
+    //console.log(totalAngle);
     let angleDifference = currentAngle - totalAngle;
-    console.log(angleDifference);
+    currentAngle = totalAngle;
+    if (angleDifference > 1 || angleDifference < -1) {
+      return;
+    }
     steeringWheel.rotateZ(angleDifference);
     currentAngle = totalAngle;
     base.rotateY(MathUtils.degToRad(angleDifference * 30));
@@ -535,7 +539,7 @@ function main() {
     if (lastPoint == null) {
       lastPoint = steeringWheel.up
     }
-    return steeringWheel.up.angleTo(dir);
+    return steeringWheel.up.angleTo(dir)
   }
   
   function getIntersections(controller) {
