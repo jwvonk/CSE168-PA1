@@ -446,11 +446,6 @@ function main() {
         helper.update();
       }
     });
-    /*const indexTip1Pos = hand1.joints[ 'index-finger-tip' ].position;
-    const indexTip2Pos = hand2.joints[ 'index-finger-tip' ].position;
-    const distance = indexTip1Pos.distanceTo( indexTip2Pos );
-    const newScale = scaling.initialScale + distance / scaling.initialDistance - 1;
-    scaling.object.scale.setScalar( newScale );*/
     intersectObjects(controller1);
     intersectObjects(controller2);
     renderer.render(scene, camera);
@@ -515,8 +510,19 @@ function main() {
     //console.log(totalAngle);
     let angleDifference = currentAngle - totalAngle;
     currentAngle = totalAngle;
-    steeringWheel.rotateZ(angleDifference);
-    base.rotateY(MathUtils.degToRad(angleDifference * 30));
+    if (newPoint.x > 0 && newPoint.y > 0) {
+      console.log("Y")
+      steeringWheel.rotateZ(angleDifference);
+      base.rotateY(MathUtils.degToRad(angleDifference * 30));
+    }
+
+    else {
+      
+      steeringWheel.rotateZ(-angleDifference);
+      base.rotateY(MathUtils.degToRad(-angleDifference * 30));
+    }
+
+    console.log(newPoint)
     lastPoint = newPoint
     curVec = steeringWheel.worldToLocal(lastPoint)
   
@@ -539,10 +545,11 @@ function main() {
     if (lastPoint == null) {
       lastPoint = steeringWheel.up
     }
-    let angle = Math.acos(dir.normalize().dot(curVec.normalize()))
-    
 
-    console.log(angle)
+    let dir2 = new THREE.Vector2(dir.normalize().x, dir.normalize().y)
+    let curVec2 = new THREE.Vector2(steeringWheel.up.normalize().x, steeringWheel.up.normalize().y);
+    let angle = Math.acos(dir2.dot(curVec2))
+
     return angle
   }
   
