@@ -540,10 +540,7 @@ function main() {
       lastPoint = steeringWheel.up
     }
     let angle = Math.acos(dir.normalize().dot(curVec.normalize()))
-    let cross = dir.cross(curVec)
-    if (cross < 0) {
-      angle = -angle
-    }
+    
 
     console.log(angle)
     return angle
